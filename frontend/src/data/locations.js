@@ -1,0 +1,18 @@
+export const locations = [
+  { label: "Quận 1" },
+  { label: "Quận 2" },
+  { label: "Quận 3" },
+  { label: "Quận 4" },
+  { label: "Quận 5" },
+  { label: "Quận 6" },
+  { label: "Quận 7" },
+  { label: "Quận 8" },
+  { label: "Quận 9" },
+  { label: "Quận 10" },
+  { label: "Quận 11" },
+  { label: "Quận 12" },
+  { label: "Bình Thạnh" },
+  { label: "Phú Nhuận" },
+  { label: "Gò Vấp" },
+  { label: "Thủ Đức" },
+];

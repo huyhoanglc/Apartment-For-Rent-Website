@@ -15,7 +15,8 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 
 import { getApartments } from "../services/apartmentApi";
-import RoomPreviewCard from "../components/RoomPreviewCard";
+import RoomPreviewCard from "../components/create-apart/RoomPreviewCard";
+import { locations } from "../data/locations";
 
 export default function Apartments() {
   const [filters, setFilters] = useState({
@@ -44,6 +45,7 @@ export default function Apartments() {
         params.district = filters.district;
       }
 
+      // Logic lọc giá
       if (filters.price === "500") {
         params.max = 5000000;
       }
@@ -61,6 +63,7 @@ export default function Apartments() {
 
       let result = data;
 
+      // Lọc keyword ở front-end
       if (filters.keyword) {
         result = result.filter((item) =>
           `${item.houseNumber} ${item.street}`
@@ -71,15 +74,16 @@ export default function Apartments() {
 
       setApartments(result);
     } catch (error) {
-      console.error(error);
+      console.error("Fetch data error:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  // Tự động fetch khi thay đổi bất kỳ filter nào (kể cả keyword)
   useEffect(() => {
     fetchData();
-  }, [filters.district, filters.price]);
+  }, [filters.district, filters.price, filters.keyword]);
 
   return (
     <Box sx={{ py: 8, bgcolor: "#f8f9fa", minHeight: "100vh" }}>
@@ -98,23 +102,18 @@ export default function Apartments() {
           color="text.secondary"
           mb={5}
         >
-          Explore premium serviced apartments
+          Explore premium serviced apartments at MQ House
         </Typography>
 
-        {/* FILTER */}
+        {/* FILTER SECTION */}
         <Paper sx={{ p: 3, borderRadius: 4, mb: 5 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                placeholder="Search..."
+                placeholder="Search by street or address..."
                 value={filters.keyword}
-                onChange={(e) =>
-                  handleChange(
-                    "keyword",
-                    e.target.value
-                  )
-                }
+                onChange={(e) => handleChange("keyword", e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -131,23 +130,15 @@ export default function Apartments() {
                 fullWidth
                 label="District"
                 value={filters.district}
-                onChange={(e) =>
-                  handleChange(
-                    "district",
-                    e.target.value
-                  )
-                }
+                onChange={(e) => handleChange("district", e.target.value)}
               >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="District 1">
-                  District 1
-                </MenuItem>
-                <MenuItem value="District 7">
-                  District 7
-                </MenuItem>
-                <MenuItem value="Binh Thanh">
-                  Binh Thanh
-                </MenuItem>
+                <MenuItem value="">All Districts</MenuItem>
+
+                {locations.map((loc) => (
+                  <MenuItem key={loc.label} value={loc.label}>
+                    {loc.label}
+                  </MenuItem>
+                ))}
               </TextField>
             </Grid>
 
@@ -155,27 +146,14 @@ export default function Apartments() {
               <TextField
                 select
                 fullWidth
-                label="Price"
+                label="Price Range"
                 value={filters.price}
-                onChange={(e) =>
-                  handleChange(
-                    "price",
-                    e.target.value
-                  )
-                }
+                onChange={(e) => handleChange("price", e.target.value)}
               >
-                <MenuItem value="">
-                  Any
-                </MenuItem>
-                <MenuItem value="500">
-                  dưới 5 triệu
-                </MenuItem>
-                <MenuItem value="1000">
-                  5 - 10 triệu
-                </MenuItem>
-                <MenuItem value="2000">
-                  trên 10 triệu
-                </MenuItem>
+                <MenuItem value="">Any Price</MenuItem>
+                <MenuItem value="500">Dưới 5 triệu</MenuItem>
+                <MenuItem value="1000">5 - 10 triệu</MenuItem>
+                <MenuItem value="2000">Trên 10 triệu</MenuItem>
               </TextField>
             </Grid>
 
@@ -183,37 +161,39 @@ export default function Apartments() {
               <Button
                 fullWidth
                 variant="contained"
-                sx={{ height: 56 }}
+                sx={{ height: 56, borderRadius: 2 }}
                 onClick={fetchData}
               >
-                Find
+                Refresh
               </Button>
             </Grid>
           </Grid>
         </Paper>
 
-        {/* LIST */}
+        {/* LIST SECTION */}
         {loading ? (
-          <Box textAlign="center">
+          <Box textAlign="center" py={10}>
             <CircularProgress />
           </Box>
         ) : (
-          <Grid container spacing={3}>
-            {apartments.map((item) => (
-              <Grid
-                item
-                xs={12}
-                sm={6}
-                md={4}
-                key={item._id}
-              >
-                <RoomPreviewCard
-                  form={item}
-                  isAdmin={false}
-                />
-              </Grid>
-            ))}
-          </Grid>
+          <>
+            <Grid container spacing={3}>
+              {apartments.map((item) => (
+                <Grid item xs={12} sm={6} md={4} key={item._id}>
+                  <RoomPreviewCard form={item} isAdmin={false} />
+                </Grid>
+              ))}
+            </Grid>
+
+            {/* Empty State */}
+            {apartments.length === 0 && (
+              <Box textAlign="center" py={10}>
+                <Typography variant="h6" color="text.secondary">
+                  No apartments found matching your criteria.
+                </Typography>
+              </Box>
+            )}
+          </>
         )}
       </Container>
     </Box>
